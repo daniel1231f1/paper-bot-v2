@@ -199,6 +199,7 @@ class OpsCfg:
     max_retries: int = 4
     retry_base_seconds: float = 1.5
     publish_seconds: int = 300
+    idle_heartbeat_seconds: int = 1800  # while asleep: refresh the dashboard heartbeat this often
     equity_curve_points: int = 3000
 
 

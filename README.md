@@ -18,7 +18,7 @@ This is the successor to [paper-bot](https://github.com/daniel1231f1/paper-bot) 
 ## How it runs with your laptop off
 
 ```
-GitHub Actions (cron every 30 min, one job at a time, ~5.5 h sessions)
+GitHub Actions (one job at a time, ~5.5 h sessions, each queues the next; cron as backup)
    restore state  <- `state` branch (single commit)
    loop: on every closed 5m bar -> fetch candles -> engine -> save state atomically
    publish        -> `state` branch: state.json + dashboard.json + index.html
@@ -27,7 +27,8 @@ GitHub Pages serves the `state` branch -> static dashboard polls dashboard.json
 
 | Concern | How it is handled |
 |---|---|
-| Cron delayed or skipped | Each run replays every candle since the last processed bar, in order. Stops, targets and the 23:00 flatten are applied exactly as they would have been. |
+| GitHub's cron is late or never fires | The bot does not depend on it. Each job runs ~5.5 h, naps through the night with a heartbeat every 30 min, and **queues its own successor** when it ends. The cron is only a backup that restarts the chain if a job is lost. |
+| A run is missed anyway | The next run replays every candle since the last processed bar, in order. Stops, targets and the 23:00 flatten are applied exactly as they would have been. |
 | Never act on stale data | A signal may open a trade only if its bar closed less than 150 s ago. Catch-up bars can close positions but never open them. If the newest candle is older than 15 min the bot reports "Data stale, not trading". |
 | Never double-trade | A bar at or before `last_bar_ts` is ignored. One job at a time (`concurrency`), and every publish is a compare-and-swap on the `state` branch: if anything else moved it, the run stops instead of overwriting. |
 | Crashed or cancelled run | State is written to a temp file, fsynced and renamed. The next run resumes from the last published state. |
@@ -102,7 +103,7 @@ bot/risk.py       sizing, limits, kill switch              bot/cli.py       comm
 invest/outlook.py      Outlook tab: historical odds with a self-test (separate from the bot)
 dashboard/index.html   single-file dashboard (no build step)
 research/              download, walk-forward backtest, exploration scripts
-tests/                 107 tests
+tests/                 109 tests
 ```
 
 ## Run it locally

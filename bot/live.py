@@ -332,10 +332,16 @@ class LiveBot:
 
     # ------------------------------------------------------------------ session loop
     def run(self, budget_seconds: float, publish: Callable[[], bool] | None = None, pre_open_wait_seconds: int = 2400) -> None:
-        """Loop until the time budget is spent, the experiment freezes, or the session is over and we are flat."""
+        """Loop until the time budget is spent or the experiment freezes.
+
+        Outside the trading window the loop does not exit: it naps, refreshing the heartbeat, until
+        the next open or the end of its budget. GitHub's cron is too unreliable to be the thing that
+        wakes the bot, so each job stays alive and the workflow queues the next job when it ends.
+        """
         cfg, bar = self.cfg, self.cfg.bar_ms
         deadline = self.now_fn() + int(budget_seconds * 1000)
         last_publish = 0
+        warmed_for = 0
         while True:
             res = self.step()
             now = self.now_fn()
@@ -350,18 +356,20 @@ class LiveBot:
             armed = self.engine.start_ts is None
             caught_up = self._upto <= self.engine.last_bar_ts or armed
             idle = not self.clock.in_window(now) or (armed and not self._can_start(now))  # asleep, or armed too late today
-            if idle and caught_up and not self.engine.positions and not self.engine.pending:
-                wait = self.clock.next_open(now) - now
-                if wait <= pre_open_wait_seconds * 1000 and now + wait < deadline:
-                    log.info("session opens in %.0f min: warming the candle cache, then waiting", wait / 60_000)
-                    self._prefetch(now)
-                    self.sleep_fn(wait / 1000 + 1)
-                    continue
-                log.info("outside the trading window and flat: sleeping until the next scheduled run")
-                break
             if now >= deadline:
-                log.info("time budget spent: handing over to the next scheduled run")
+                log.info("time budget spent: handing over to the next run")
                 break
+            if idle and caught_up and not self.engine.positions and not self.engine.pending:
+                nxt = self.clock.next_open(now)
+                wait = nxt - now
+                if wait <= pre_open_wait_seconds * 1000 and warmed_for != nxt:
+                    log.info("session opens in %.0f min: warming the candle cache", wait / 60_000)
+                    self._prefetch(now)
+                    warmed_for = nxt
+                # nap until the open, the next heartbeat or the end of this job, whichever is first
+                nap = min(wait / 1000 + 1, cfg.ops.idle_heartbeat_seconds, (deadline - now) / 1000)
+                self.sleep_fn(max(1.0, nap))
+                continue
             # sleep to just after the next bar close, then poll quickly until the exchange has published it
             to_close = ((now // bar + 1) * bar - now) / 1000 + 3
             if self.data_error:

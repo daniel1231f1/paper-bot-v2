@@ -88,6 +88,9 @@ def cmd_run(args: argparse.Namespace) -> int:
         return 0
     publish = make_publisher(args.publish_script) if os.getenv("PUBLISH") == "1" else None
     bot.run(float(os.getenv("RUN_SECONDS", args.budget)), publish)
+    if bot.engine.frozen:  # experiment over: the workflow must not queue another session
+        Path(args.state_dir).mkdir(parents=True, exist_ok=True)
+        (Path(args.state_dir) / ".stop_chain").write_text("experiment complete\n")
     return 0
 
 

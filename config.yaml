@@ -109,4 +109,5 @@ ops:                            # operational only; not part of the locked hash
   max_retries: 4
   retry_base_seconds: 1.5
   publish_seconds: 300
+  idle_heartbeat_seconds: 1800
   equity_curve_points: 3000

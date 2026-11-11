@@ -243,13 +243,16 @@ def test_freeze_and_final_report_on_the_last_day(tmp_path, monkeypatch):
     assert v["experiment"]["day"] == 2 and v["experiment"]["progress"] == 1.0
 
 
-def test_run_loop_exits_quickly_when_asleep_and_flat(world):
-    world.t = ist(2026, 1, 5, 1, 0) + 5_000
+def test_run_loop_stays_alive_at_night_with_heartbeats_and_never_trades(world):
+    start = world.t = ist(2026, 1, 5, 1, 0) + 5_000
+    world.forced[A].add(ist(2026, 1, 5, 1, 30))  # a signal in the middle of the night
     published: list[int] = []
     bot = world.bot()
     bot.run(3600, publish=lambda: published.append(world.t) or True)
-    assert bot.engine.start_ts is None and world.t < ist(2026, 1, 5, 1, 2)  # no waiting around at night
-    assert published
+    assert bot.engine.start_ts is None and not bot.engine.pending  # asleep: nothing starts, nothing trades
+    assert start + 3_600_000 <= world.t < start + 3_700_000  # used its whole budget instead of exiting
+    assert len(published) >= 3  # heartbeat roughly every 30 minutes, plus the final publish
+    assert max(b - a for a, b in zip(published, published[1:])) <= 31 * 60_000
 
 
 def test_run_loop_waits_for_the_open_then_trades_on_bar_closes(world):
@@ -319,7 +322,8 @@ def test_late_first_run_stays_armed_and_starts_at_the_next_open(world):
     assert res.status == "ARMED" and bot.engine.start_ts is None and not bot.engine.pending
     published: list[int] = []
     bot.run(3600, publish=lambda: published.append(world.t) or True)
-    assert bot.engine.start_ts is None and world.t < ist(2026, 1, 5, 16, 2) and published  # run exits, no idle polling
+    assert bot.engine.start_ts is None and published  # stays armed for its whole budget
+    assert len(published) <= 4  # naps between heartbeats: no bar-by-bar polling while armed
     world.t = ist(2026, 1, 6, 7, 5) + 5_000
     nxt = world.bot()
     assert nxt.step().status == "ACTIVE"
@@ -355,3 +359,33 @@ def test_code_fingerprint_tracks_trading_code_only(tmp_path, monkeypatch):
     assert live.engine_code_hash() == first
     (pkg / "risk.py").write_text((pkg / "risk.py").read_text() + "\n# edit\n")
     assert live.engine_code_hash() != first  # any trading-code edit is detected
+
+
+def test_one_job_can_sleep_through_the_night_and_start_trading_at_the_open(world):
+    """No cron needed: a job that begins at 03:00 IST waits, then trades from 07:00 IST."""
+    world.t = ist(2026, 1, 5, 3, 0) + 5_000
+    first_sig = ist(2026, 1, 5, 7, 10)
+    world.forced[A].add(first_sig)
+    bot = world.bot()
+    bot.run(5 * 3600, publish=lambda: True)  # 03:00 -> 08:00
+    eng = bot.engine
+    assert eng.start_ts == ist(2026, 1, 5, 7, 0)
+    assert (eng.positions[A].entry_ts if A in eng.positions else eng.trades[0].entry_ts) == first_sig + BAR
+
+
+def test_cli_marks_the_chain_finished_only_when_the_experiment_is_frozen(tmp_path, monkeypatch):
+    import bot.cli as cli
+
+    class Fake:
+        def __init__(self, frozen):
+            self.engine = type("E", (), {"frozen": frozen, "start_ts": 1})()
+            self.cfg = type("C", (), {"hash": "x" * 64})()
+            self.md = type("M", (), {"flush": lambda self: None})()
+        def run(self, budget, publish):
+            return None
+
+    for frozen in (False, True):
+        state = tmp_path / str(frozen)
+        monkeypatch.setattr(live, "LiveBot", lambda *a, _f=frozen, **k: Fake(_f))
+        assert cli.main(["--state-dir", str(state), "run"]) == 0
+        assert (state / ".stop_chain").exists() is frozen

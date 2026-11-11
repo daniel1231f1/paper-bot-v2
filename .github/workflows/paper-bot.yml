@@ -1,9 +1,10 @@
 name: paper-bot
-# PAPER TRADING ONLY. Runs the bot in ~5.5h sessions. Triggers arriving while a session is running
-# queue behind it (one pending run at most), so there is always exactly one writer of the state.
+# PAPER TRADING ONLY. Runs the bot in ~5.5h sessions, back to back: each job queues the next one
+# when it ends, so the bot keeps going even if GitHub's cron never fires. Triggers arriving while a
+# session is running queue behind it (one pending run at most): always exactly one writer of the state.
 on:
   schedule:
-    - cron: "7,37 * * * *"   # UTC. GitHub may delay or skip these; the bot catches up idempotently.
+    - cron: "7,37 * * * *"   # UTC. Backup only: restarts the chain if a job was lost.
   push:                      # a deploy starts (or queues) a run straight away
     branches: [main]
     paths: ["bot/**", "config.yaml", "dashboard/**", "scripts/**", "requirements.txt", ".github/workflows/paper-bot.yml"]
@@ -15,6 +16,7 @@ on:
         default: ""
 permissions:
   contents: write
+  actions: write   # lets a finishing job queue the next one (workflow_dispatch)
 concurrency:
   group: paper-bot
   cancel-in-progress: false
@@ -52,6 +54,16 @@ jobs:
       - name: Publish final state
         if: always()
         run: bash scripts/publish_state.sh || true
+      - name: Queue the next session
+        # GitHub's cron can be hours late or never fire on some repositories, so the bot does not
+        # depend on it: every job queues its successor here. The concurrency group keeps exactly
+        # one job running; the queued one starts the moment this one ends.
+        if: always()
+        run: |
+          if [ -f "$STATE_DIR/.stop_chain" ]; then echo "experiment complete: not queuing another session"; exit 0; fi
+          if [ "${{ job.status }}" != "success" ]; then echo "this job did not succeed: pausing 10 minutes before queuing the next"; sleep 600; fi
+          gh workflow run paper-bot.yml --ref "$GITHUB_REF_NAME" && echo "queued the next session"
+          gh workflow run outlook.yml --ref "$GITHUB_REF_NAME" && echo "queued an outlook refresh" || true
       - name: Save candle + model cache
         if: always()
         uses: actions/cache/save@v4
