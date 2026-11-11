@@ -50,7 +50,11 @@ jobs:
         if: github.event_name == 'workflow_dispatch' && inputs.reset_experiment == 'RESET'
         run: bash scripts/reset_experiment.sh
       - name: Run bot
-        run: python -m bot.cli run
+        run: |
+          # refresh the Outlook tab's data every hour while this job is alive (a background loop here,
+          # so the trading code is untouched and no extra runner is used)
+          (while sleep 3600; do gh workflow run outlook.yml --ref "$GITHUB_REF_NAME" || true; done) &
+          python -m bot.cli run
       - name: Publish final state
         if: always()
         run: bash scripts/publish_state.sh || true

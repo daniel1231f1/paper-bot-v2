@@ -153,6 +153,14 @@ class Windows:
         cond, n_eff = shrink(self.cum_up[state + 1, cut], self.cum_n[state + 1, cut], base, self.h)
         return {"base": base, "cond": cond, "n_eff": n_eff, "n_eff_base": n_all / self.h}
 
+    def by_trend(self, cut: int) -> dict[str, dict[str, float | None]]:
+        """Raw share of windows that ended higher, split by the trend state they started in."""
+        out: dict[str, dict[str, float | None]] = {}
+        for name, row in (("below", 1), ("above", 2)):
+            n = self.cum_n[row, cut]
+            out[name] = {"p": float(self.cum_up[row, cut] / n) if n > 0 else None, "n_eff": float(n / self.h)}
+        return out
+
     def walk_forward(self, min_train: int) -> dict[str, np.ndarray]:
         """Replay: at each past decision bar i (every h bars) estimate from windows resolved by i,
         then look up what actually happened. Outcomes do not overlap, estimates never see the future."""
@@ -212,9 +220,22 @@ def analyse(df: pd.DataFrame) -> dict[str, Any]:
             "label": label, "bars": h, "prob": prob, "lo": lo, "hi": hi, "base": est["base"], "cond": est["cond"],
             "used": "conditional" if use_cond else "base", "n_eff": n_eff, "windows": int(len(rets)),
             "dist": {"p10": p10, "p50": p50, "p90": p90}, "score": sc,
+            "by_trend": w.by_trend(len(w.up)),
+            # a description of history, never an instruction: "up"/"down" only when the whole
+            # 80% range sits on one side of 50%, otherwise there is no clear lean to report
+            "lean": "up" if lo > 0.5 else "down" if hi < 0.5 else "none",
         })
         squared.append((label, wf))
+    year = max(2, round(bpy))
+    daily = np.diff(np.log(close[-year:]))
+    back = lambda bars: float(close[-1] / close[-1 - bars] - 1) if n > bars else None  # noqa: E731
+    facts = {
+        "ret_1m": back(round(bpy / 12)), "ret_3m": back(round(bpy / 4)), "ret_1y": back(year),
+        "from_1y_high": float(close[-1] / close[-year:].max() - 1),  # 0 = at its 1-year high
+        "swing_1m": float(daily.std() * math.sqrt(bpy / 12)) if len(daily) > 20 else None,  # typical 1-month move
+    }
     return {
+        "facts": facts,
         "as_of": df["date"].iloc[-1].strftime("%Y-%m-%d"), "last": float(close[-1]),
         "history_years": round((df["date"].iloc[-1] - df["date"].iloc[0]).days / 365.25, 1),
         "trend": {"state": "unknown" if math.isnan(sma_now) else "above" if close[-1] > sma_now else "below",

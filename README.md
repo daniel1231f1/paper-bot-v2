@@ -103,7 +103,7 @@ bot/risk.py       sizing, limits, kill switch              bot/cli.py       comm
 invest/outlook.py      Outlook tab: historical odds with a self-test (separate from the bot)
 dashboard/index.html   single-file dashboard (no build step)
 research/              download, walk-forward backtest, exploration scripts
-tests/                 109 tests
+tests/                 111 tests
 ```
 
 ## Run it locally
@@ -155,6 +155,12 @@ It is independent of the trading experiment: its own package (`invest/`), its ow
 (`outlook.yml`) and its own branch (`outlook`). It never touches the bot's state or config. Edit
 `invest/watchlist.yaml` to change the assets (Yahoo Finance tickers). Data: Yahoo Finance daily
 adjusted closes, fetched without a key; if a fetch fails the last good result is shown, marked stale.
+It refreshes about once an hour while the bot is running. Refreshing faster would not make it more
+accurate: the horizons are months, and the inputs are daily closing prices.
+
+Each row carries a plain-word label, "History leans up / down" or "No clear lean", shown only by
+which side of 50% the whole range sits on, and a "Why this number" list of the facts behind it.
+The tab deliberately does **not** say BUY or SELL: its own self-test shows no edge worth acting on.
 
 ```bash
 .venv/bin/python -m invest.outlook --out outlook.json

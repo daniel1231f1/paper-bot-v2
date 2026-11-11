@@ -163,3 +163,27 @@ def test_watchlist_validation(tmp_path):
     bad.write_text("assets:\n  - {symbol: AAA, name: A, kind: stock}\n  - {symbol: AAA, name: A2, kind: stock}\n")
     with pytest.raises(OutlookError):
         load_watchlist(bad)
+
+
+def test_lean_is_reported_only_when_the_whole_range_is_on_one_side():
+    up = pd.DataFrame({"date": pd.bdate_range("2010-01-01", periods=2500, tz="UTC"), "close": np.linspace(50, 500, 2500)})
+    assert all(h["lean"] == "up" for h in analyse(up)["horizons"])
+    assert all(h["lean"] == "down" for h in analyse(up.assign(close=np.linspace(500, 50, 2500)))["horizons"])
+    flat = analyse(series(3000, drift=0.0, seed=5))  # driftless random walk: no honest lean
+    assert any(h["lean"] == "none" for h in flat["horizons"])
+    for h in flat["horizons"]:
+        assert (h["lean"] == "up") == (h["lo"] > 0.5) and (h["lean"] == "down") == (h["hi"] < 0.5)
+
+
+def test_reasons_are_plain_facts_from_the_price_history():
+    df = series(3000, seed=2)
+    res = analyse(df)
+    close = df["close"].to_numpy()
+    f = res["facts"]
+    bpy = ol.bars_per_year(df["date"])  # ~261 for a weekday calendar with no holidays
+    assert f["ret_1m"] == pytest.approx(close[-1] / close[-1 - round(bpy / 12)] - 1)
+    assert f["ret_1y"] == pytest.approx(close[-1] / close[-1 - round(bpy)] - 1)
+    assert f["from_1y_high"] <= 0 and f["swing_1m"] > 0
+    for h in res["horizons"]:
+        bt = h["by_trend"]
+        assert set(bt) == {"above", "below"} and all(0 <= bt[k]["p"] <= 1 and bt[k]["n_eff"] > 0 for k in bt)

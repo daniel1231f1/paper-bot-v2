@@ -86,6 +86,14 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .opct small{display:block;font-family:var(--font-mono);font-size:10.5px;letter-spacing:0;color:var(--color-muted);margin-top:5px}
 .otyp{font-family:var(--font-mono);font-size:11.5px;line-height:1.7;color:var(--color-muted)}.otyp b{color:var(--color-text);font-weight:500}
 #viewOutlook .panel{animation:none}
+.opct .lean{display:inline-block;margin-top:8px;font-family:var(--font-mono);font-size:9.5px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;padding:3px 7px;border-radius:4px;border:1px solid var(--color-line);color:var(--color-muted);white-space:nowrap}
+.opct .lean.up{color:var(--color-gain);border-color:currentColor}.opct .lean.down{color:var(--color-loss);border-color:currentColor}
+.owhy{grid-column:1/-1;margin-top:2px}
+.owhy summary{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-muted);cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:7px;padding:4px 0;transition:color .2s}
+.owhy summary::-webkit-details-marker{display:none}.owhy summary::before{content:"+";display:inline-grid;place-items:center;width:15px;height:15px;border:1px solid var(--color-line);border-radius:50%;font-size:11px;line-height:1}
+.owhy[open] summary::before{content:"–"}.owhy summary:hover{color:var(--color-text)}
+.owhy ul{margin:8px 0 6px;padding:14px 18px 14px 34px;background:var(--color-raised);border-radius:10px;font-size:13px;line-height:1.6;color:var(--color-muted);max-width:92ch}
+.owhy li{margin-bottom:7px}.owhy li:last-child{margin-bottom:0}.owhy b{color:var(--color-text);font-weight:500}
 .ocav{margin:clamp(14px,1.8vw,24px) 0 clamp(22px,3vw,40px)}.ocav ul{margin:14px 0 0;padding-left:18px;color:var(--color-muted);font-size:13.5px;line-height:1.65;max-width:86ch}.ocav li{margin-bottom:8px}.ocav b{color:var(--color-text);font-weight:500}
 .okey{display:flex;gap:16px;flex-wrap:wrap;font-family:var(--font-mono);font-size:10.5px;color:var(--color-muted);padding:2px 0 12px;border-bottom:1px solid var(--color-line)}
 .okey i{display:inline-block;vertical-align:middle;margin-right:6px}.okey .kd{width:10px;height:10px;border-radius:50%;background:var(--color-accent)}.okey .kb{width:22px;height:8px;border-radius:4px;border:1px solid var(--color-accent);background:var(--color-glow)}.okey .kl{width:0;height:14px;border-left:1px dashed var(--color-text)}
@@ -239,7 +247,7 @@ footer{padding:26px 0 60px;color:var(--color-muted);font-size:12px;display:flex;
 footer .mono{font-size:11px}
 
 @media (max-width:980px){
-  .ohero{grid-template-columns:1fr}.orow{grid-template-columns:minmax(0,1fr) 110px}.orow .gauge{grid-column:1/-1;order:3}.orow .otyp{grid-column:1/-1;order:4}
+  .ohero{grid-template-columns:1fr}.orow{grid-template-columns:minmax(0,1fr) 110px}.orow .gauge{grid-column:1/-1;order:3}.orow .otyp{grid-column:1/-1;order:4}.orow .owhy{order:5}
   .c7,.c5,.c8,.c4{grid-column:span 12}.vgrid{grid-template-columns:1fr}.bars{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media (max-width:640px){
@@ -714,16 +722,33 @@ function outlook() {
   const gen = new Date(O.generated_ts);
   $("oMeta").textContent = `updated ${fFull.format(gen)} IST · ${O.ok}/${O.assets.length} assets fresh · ${O.method.source}`;
   const rows = O.assets.filter(a => !oK || a.kind === oK);
-  $("oList").innerHTML = `<div class="okey"><span><i class="kd"></i>share of past periods that ended higher</span><span><i class="kb"></i>80% range</span><span><i class="kl"></i>plain base rate</span><span>centre tick = 50%</span></div>` + (rows.map(a => {
+  $("oList").innerHTML = `<div class="okey"><span><i class="kd"></i>share of past periods that ended higher</span><span><i class="kb"></i>80% range</span><span><i class="kl"></i>plain base rate</span><span>centre tick = 50%</span><span>label = which side of 50% the whole range sits on</span></div>` + (rows.map(a => {
     const h = (a.horizons || []).find(x => x.label === lab);
-    const head = `<div><div class="nm">${esc(a.name)}</div><div class="sm"><span>${esc(a.symbol)}</span><span class="tag">${KIND[a.kind] || esc(a.kind)}</span>${a.kind === "stock" ? '<span class="tag" title="This company is on the list because it survived and grew. Its history is flattering.">survivor</span>' : ""}${a.trend && a.trend.state !== "unknown" ? `<span class="tag ${a.trend.state === "above" ? "long" : "short"}" title="Last price versus its 200-day average">${a.trend.state} 200d avg</span>` : ""}${a.stale ? '<span class="tag" style="color:var(--color-warn);border-color:currentColor" title="Today\'s data fetch failed; showing the last good result">stale</span>' : ""}</div><div class="sm">${a.history_years ? `${a.history_years} years of data · as of ${esc(a.as_of)}` : ""}${h && h.used === "conditional" ? ' · <span title="The trend signal beat the base rate in the replay for this asset, so it is applied here">trend-adjusted</span>' : ""}</div></div>`;
+    const head = `<div><div class="nm">${esc(a.name)}</div><div class="sm"><span>${esc(a.symbol)}</span><span class="tag">${KIND[a.kind] || esc(a.kind)}</span>${a.kind === "stock" ? '<span class="tag" title="This company is on the list because it survived and grew. Its history is flattering.">survivor</span>' : ""}${a.stale ? '<span class="tag" style="color:var(--color-warn);border-color:currentColor" title="Today\'s data fetch failed; showing the last good result">stale</span>' : ""}</div><div class="sm">${a.history_years ? `${a.history_years} years of data · as of ${esc(a.as_of)}` : ""}${h && h.used === "conditional" ? ' · <span title="The trend signal beat the base rate in the replay for this asset, so it is applied here">trend-adjusted</span>' : ""}</div></div>`;
+    const LEAN = {up: ["History leans up", "lean up"], down: ["History leans down", "lean down"], none: ["No clear lean", "lean none"]};
     if (!h || h.prob == null) return `<div class="orow">${head}<div class="otyp" style="grid-column:2/-1">${esc(a.error ? "Data unavailable: " + a.error : (h && h.note) || "Not enough history for this horizon.")}</div></div>`;
     const sc = h.score || {}, d = h.dist;
     return `<div class="orow">${head}
       <div class="gauge" title="Estimate ${P(h.prob)}%, range ${P(h.lo)}–${P(h.hi)}%, base rate ${P(h.base)}%"><span class="half"></span><span class="band" style="left:${(h.lo * 100).toFixed(1)}%;width:${((h.hi - h.lo) * 100).toFixed(1)}%"></span><span class="base" style="left:${(h.base * 100).toFixed(1)}%"></span><span class="dot" style="left:${(h.prob * 100).toFixed(1)}%"></span><span class="ax" style="left:0">0%</span><span class="ax" style="right:0">100%</span></div>
-      <div class="opct">${P(h.prob)}<span style="font-size:.5em;color:var(--color-muted)">%</span><small>range ${P(h.lo)}–${P(h.hi)}%</small></div>
-      <div class="otyp">typical move <b class="${cls(d.p50)}">${pct(d.p50, 1)}</b><br>1 in 10 worse than <b>${pct(d.p10, 1)}</b><br>1 in 10 better than <b>${pct(d.p90, 1)}</b></div></div>`;
+      <div class="opct">${P(h.prob)}<span style="font-size:.5em;color:var(--color-muted)">%</span><small>range ${P(h.lo)}–${P(h.hi)}%</small>${h.lean ? `<span class="${LEAN[h.lean][1]}" title="A description of the past, not an instruction to buy or sell. Shown only when the whole range is on one side of 50%.">${LEAN[h.lean][0]}</span>` : ""}</div>
+      <div class="otyp">typical move <b class="${cls(d.p50)}">${pct(d.p50, 1)}</b><br>1 in 10 worse than <b>${pct(d.p10, 1)}</b><br>1 in 10 better than <b>${pct(d.p90, 1)}</b></div>
+      ${reasons(a, h, lab)}</div>`;
   }).join("") || `<div class="empty"><b>Nothing in this category.</b></div>`);
+}
+function reasons(a, h, lab) {
+  const P = v => (v * 100).toFixed(0), f = a.facts || {}, t = a.trend || {}, bt = h.by_trend || {}, sc = h.score || {}, per = lab.replace(/^1 /, "");
+  const li = [];
+  li.push(`<b>The headline number.</b> Over ${a.history_years} years of prices, ${P(h.base)}% of all ${esc(per)}-long periods ended higher. Because those periods overlap, that is roughly ${Math.round(h.n_eff)} independent observations, which gives the ${P(h.lo)}–${P(h.hi)}% range.`);
+  if (t.state && t.state !== "unknown" && bt.above && bt.below && bt.above.p != null && bt.below.p != null) {
+    const mine = bt[t.state], other = bt[t.state === "above" ? "below" : "above"];
+    li.push(`<b>Trend.</b> The price is ${Math.abs(t.gap * 100).toFixed(1)}% ${t.state} its 200-day average. Periods that started ${t.state} it ended higher ${P(mine.p)}% of the time; periods that started ${t.state === "above" ? "below" : "above"} it, ${P(other.p)}%. ${h.used === "conditional" ? "In the replay this gap held up for this asset, so the headline is adjusted for it." : "In the replay, adjusting for this did not beat the plain average, so the headline ignores it."}`);
+  }
+  if (f.ret_1y != null) li.push(`<b>Recent path.</b> ${pct(f.ret_1m, 1)} over the last month, ${pct(f.ret_3m, 1)} over three months, ${pct(f.ret_1y, 1)} over a year. It is ${f.from_1y_high > -0.005 ? "at" : Math.abs(f.from_1y_high * 100).toFixed(1) + "% below"} its one-year high. Recent gains or falls did not reliably predict the next move in the replay.`);
+  if (f.swing_1m != null) li.push(`<b>How much it moves.</b> A typical one-month swing is about ±${(f.swing_1m * 100).toFixed(1)}%, so a ${P(h.prob)}% chance of being higher still leaves large moves in both directions (see the 1-in-10 figures).`);
+  if (sc.n) li.push(`<b>How this estimate did before.</b> Replayed at ${sc.n} past dates for this asset: score ${sc.brier.toFixed(3)} against 0.250 for a coin flip${sc.n_60 ? `. When it said 60% or more (${sc.n_60} times), the price ended higher ${P(sc.hit_60)}% of the time` : ""}.`);
+  if (h.lean) li.push(`<b>The label.</b> “${h.lean === "up" ? "History leans up" : h.lean === "down" ? "History leans down" : "No clear lean"}” means ${h.lean === "none" ? "the range includes 50%, so history does not clearly favour either direction" : "the whole range sits " + (h.lean === "up" ? "above" : "below") + " 50%"}. It describes the past. It is not a signal to buy or sell.`);
+  if (a.kind === "stock") li.push(`<b>Survivor effect.</b> This company is listed because it grew. Companies that failed are not on the list, so this history is flattering.`);
+  return `<details class="owhy"><summary>Why this number</summary><ul>${li.map(x => `<li>${x}</li>`).join("")}</ul></details>`;
 }
 function setView(v) {
   const out = v === "outlook";
