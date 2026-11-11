@@ -6,5 +6,3 @@ state/
 research/out/
 *.tmp
 .env
-book.csv
-report.txt

@@ -11,7 +11,9 @@ and issues a PASS / MARGINAL / FAIL verdict against criteria fixed in advance.
 > demonstrated edge after costs**. The live experiment is an honest out-of-sample check of that
 > finding, not a money machine.
 
-Dashboard: **https://daniel1231f1.github.io/paper-bot/** (add `?demo` to preview the layout with clearly labelled fake data).
+Dashboard: `https://<owner>.github.io/<this-repo>/` once Pages is enabled (add `?demo` to preview the layout with clearly labelled fake data).
+
+This is the successor to [paper-bot](https://github.com/daniel1231f1/paper-bot) (v1), which keeps running separately.
 
 ## How it runs with your laptop off
 
@@ -34,7 +36,7 @@ GitHub Pages serves the `state` branch -> static dashboard polls dashboard.json
 | IST schedule | All schedule logic goes through `bot/clock.py` using `zoneinfo` (`Asia/Kolkata`, UTC+05:30, no DST). |
 
 Why GitHub Actions and not an always-on VM: it is free for public repos, needs no server to patch,
-and the existing repo already used it. The cost is timer jitter, which the catch-up design absorbs.
+and the v1 bot already used it. The cost is timer jitter, which the catch-up design absorbs.
 
 ## The 10-day clock and the config lock
 
@@ -99,8 +101,6 @@ bot/broker.py     paper fills and costs                    bot/notify.py    opti
 bot/risk.py       sizing, limits, kill switch              bot/cli.py       command line
 dashboard/index.html   single-file dashboard (no build step)
 research/              download, walk-forward backtest, exploration scripts
-                       (record_book.py / analyze_book.py: the separate order-book recorder,
-                        run by record-book.yml into the `book` branch; independent of the bot)
 tests/                 91 tests
 ```
 
@@ -127,6 +127,13 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 ```
 
 `run --once --now <ISO time>` replays the bot at a past wall-clock time against real candles.
+
+## First-time setup of this repository
+
+1. Push this code to an empty public repository. The push itself starts the first bot run.
+2. After that run has created the `state` branch (about two minutes): Settings → Pages → Build and
+   deployment → Source "Deploy from a branch" → Branch `state`, folder `/ (root)` → Save.
+3. Nothing else. No secrets are required. Scheduled runs then keep it going every 30 minutes.
 
 ## Optional Telegram alerts
 
