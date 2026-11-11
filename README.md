@@ -101,7 +101,7 @@ dashboard/index.html   single-file dashboard (no build step)
 research/              download, walk-forward backtest, exploration scripts
                        (record_book.py / analyze_book.py: the separate order-book recorder,
                         run by record-book.yml into the `book` branch; independent of the bot)
-tests/                 90 tests
+tests/                 91 tests
 ```
 
 ## Run it locally

@@ -160,6 +160,17 @@ class LiveBot:
                            "base_rate": model.base_rate if model else None,
                            "loss_r": model.loss_r if model else None, "trained_ts": now}
 
+    def _prefetch(self, now: int) -> None:
+        """Download the training window ahead of the open so the daily retrain is quick and bar 1 stays fresh."""
+        cfg = self.cfg
+        start = now - (cfg.model.train_days + 2) * DAY_MS - cfg.ops.warmup_bars * cfg.bar_ms
+        try:
+            for s in cfg.market.universe:
+                self.md.history(s, start, now, persist=False)
+            self.md.flush()
+        except DataUnavailable as exc:
+            log.warning("prefetch failed (%s): the retrain will fetch what it needs", exc)
+
     # ------------------------------------------------------------------ one pass
     def step(self) -> StepResult:
         now = self.now_fn()
@@ -227,7 +238,8 @@ class LiveBot:
                                                str(c["skip_reason"])))
             if not frame:
                 continue
-            fresh = (now - (ts + bar)) <= max_age and not self.data_stale
+            # re-read the clock: model training above may have taken minutes, and a late decision is a stale one
+            fresh = (self.now_fn() - (ts + bar)) <= max_age and not self.data_stale
             if eng.start_ts is None and self.meta.get("code_sha_start") is None:
                 self.meta["code_sha_start"], self.meta["created_ts"] = self.meta["code_sha"], now
             eng.on_bar(ts, frame, proposals, fresh=fresh)
@@ -328,7 +340,8 @@ class LiveBot:
             if idle and caught_up and not self.engine.positions and not self.engine.pending:
                 wait = self.clock.next_open(now) - now
                 if wait <= pre_open_wait_seconds * 1000 and now + wait < deadline:
-                    log.info("session opens in %.0f min: waiting", wait / 60_000)
+                    log.info("session opens in %.0f min: warming the candle cache, then waiting", wait / 60_000)
+                    self._prefetch(now)
                     self.sleep_fn(wait / 1000 + 1)
                     continue
                 log.info("outside the trading window and flat: sleeping until the next scheduled run")

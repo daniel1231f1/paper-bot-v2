@@ -324,3 +324,19 @@ def test_late_first_run_stays_armed_and_starts_at_the_next_open(world):
     nxt = world.bot()
     assert nxt.step().status == "ACTIVE"
     assert nxt.engine.start_ts == ist(2026, 1, 6, 7, 5) and nxt.engine.end_ts == ist(2026, 1, 15, 23, 0)
+
+
+def test_signal_goes_stale_if_the_decision_is_made_late_within_one_pass(world, monkeypatch):
+    """Slow work inside a pass (e.g. the daily retrain) must not let an old bar open a trade."""
+    sig = ist(2026, 1, 5, 9, 55)
+    world.forced[A].add(sig)
+    world.t = sig + BAR + 5_000
+
+    def slow_training(self, now, ts):
+        self.model = object()
+        world.t += 4 * 60_000  # four minutes pass before the decision is taken
+
+    monkeypatch.setattr(LiveBot, "_ensure_model", slow_training)
+    bot = world.bot()
+    bot.step()
+    assert not bot.engine.pending and "stale" in bot.engine.decisions[-1]["reason"]
