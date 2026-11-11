@@ -11,8 +11,8 @@ time, any number of times:
 """
 from __future__ import annotations
 
+import hashlib
 import logging
-import os
 import pickle
 import time
 from dataclasses import dataclass, replace
@@ -46,6 +46,19 @@ class StepResult:
     frozen: bool
 
 
+def engine_code_hash() -> str:
+    """Fingerprint of the trading code itself (every .py file in this package).
+
+    Used to flag a mid-experiment change. A commit that only touches the dashboard, docs or the
+    separate Outlook tool leaves it unchanged, so those do not raise a false alarm.
+    """
+    digest = hashlib.sha256()
+    for path in sorted(Path(__file__).parent.glob("*.py")):
+        digest.update(path.name.encode())
+        digest.update(path.read_bytes())
+    return digest.hexdigest()[:12]
+
+
 def _now_ms() -> int:
     return int(time.time() * 1000)
 
@@ -76,7 +89,7 @@ class LiveBot:
         self.why: dict[str, Any] = dict(saved.get("why", {}))
         self.model_meta: dict[str, Any] = dict(saved.get("model", {"ready": False}))
         self.meta: dict[str, Any] = {
-            "config_file_hash": file_cfg.hash, "code_sha": os.getenv("GITHUB_SHA", "local")[:12],
+            "config_file_hash": file_cfg.hash, "code_sha": engine_code_hash(),
             "code_sha_start": saved.get("code_sha_start"), "created_ts": saved.get("created_ts"),
             "backtest": backtest_summary if backtest_summary is not None else saved.get("backtest"),
         }

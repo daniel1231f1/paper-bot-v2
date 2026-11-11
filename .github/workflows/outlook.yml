@@ -1,0 +1,38 @@
+name: outlook
+# Daily historical-odds table for the dashboard's Outlook tab. Independent of the trading bot:
+# its own concurrency group and its own branch (`outlook`). Not a forecast, not advice.
+on:
+  schedule:
+    - cron: "40 0 * * *"   # 06:10 IST
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["invest/**", "scripts/publish_outlook.sh", ".github/workflows/outlook.yml"]
+permissions:
+  contents: write
+concurrency:
+  group: outlook
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+      - run: pip install -q -r requirements.txt
+      - name: Restore the last published outlook (reused for any asset that fails today)
+        run: |
+          if git ls-remote --exit-code --heads origin outlook >/dev/null 2>&1; then
+            git fetch -q --depth 1 origin outlook
+            git show FETCH_HEAD:outlook.json > previous.json || rm -f previous.json
+          fi
+      - name: Build outlook
+        run: python -m invest.outlook --out outlook.json --previous previous.json
+      - name: Publish
+        run: bash scripts/publish_outlook.sh

@@ -1,0 +1,21 @@
+# Assets shown on the dashboard's Outlook tab. Edit freely: this list is a starting point,
+# not a recommendation. `symbol` is the Yahoo Finance ticker; `kind` is one of
+# index | stock | commodity | crypto.
+assets:
+  - {symbol: "^GSPC",       name: "S&P 500",            kind: index}
+  - {symbol: "^NDX",        name: "Nasdaq 100",         kind: index}
+  - {symbol: "^NSEI",       name: "Nifty 50",           kind: index}
+  - {symbol: "GC=F",        name: "Gold",               kind: commodity}
+  - {symbol: "SI=F",        name: "Silver",             kind: commodity}
+  - {symbol: "BTC-USD",     name: "Bitcoin",            kind: crypto}
+  - {symbol: "ETH-USD",     name: "Ethereum",           kind: crypto}
+  - {symbol: "AAPL",        name: "Apple",              kind: stock}
+  - {symbol: "MSFT",        name: "Microsoft",          kind: stock}
+  - {symbol: "NVDA",        name: "Nvidia",             kind: stock}
+  - {symbol: "GOOGL",       name: "Alphabet",           kind: stock}
+  - {symbol: "AMZN",        name: "Amazon",             kind: stock}
+  - {symbol: "TSLA",        name: "Tesla",              kind: stock}
+  - {symbol: "RELIANCE.NS", name: "Reliance Industries", kind: stock}
+  - {symbol: "TCS.NS",      name: "TCS",                kind: stock}
+  - {symbol: "HDFCBANK.NS", name: "HDFC Bank",          kind: stock}
+  - {symbol: "INFY.NS",     name: "Infosys",            kind: stock}

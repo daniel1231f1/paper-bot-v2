@@ -340,3 +340,18 @@ def test_signal_goes_stale_if_the_decision_is_made_late_within_one_pass(world, m
     bot = world.bot()
     bot.step()
     assert not bot.engine.pending and "stale" in bot.engine.decisions[-1]["reason"]
+
+
+def test_code_fingerprint_tracks_trading_code_only(tmp_path, monkeypatch):
+    first = live.engine_code_hash()
+    assert len(first) == 12 and first == live.engine_code_hash()  # stable
+    pkg = tmp_path / "bot"
+    pkg.mkdir()
+    for src in live.Path(live.__file__).parent.glob("*.py"):
+        (pkg / src.name).write_bytes(src.read_bytes())
+    monkeypatch.setattr(live, "__file__", str(pkg / "live.py"))
+    assert live.engine_code_hash() == first  # same files elsewhere -> same fingerprint
+    (tmp_path / "dashboard.html").write_text("changed")  # non-trading file: ignored
+    assert live.engine_code_hash() == first
+    (pkg / "risk.py").write_text((pkg / "risk.py").read_text() + "\n# edit\n")
+    assert live.engine_code_hash() != first  # any trading-code edit is detected

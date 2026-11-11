@@ -56,6 +56,40 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .banner{margin-top:12px;padding:10px 14px;border:1px solid var(--color-warn);border-radius:10px;color:var(--color-warn);font-family:var(--font-mono);font-size:12px;display:none}
 .banner.on{display:block}
 
+/* view tabs */
+.tabs{display:inline-flex;gap:2px;border:1px solid var(--color-line);border-radius:99px;padding:2px}
+.tabs button{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.04em;padding:6px 13px;border-radius:99px;color:var(--color-muted);transition:all .2s var(--ease)}
+.tabs button:hover{color:var(--color-text)}.tabs button.on{background:var(--color-text);color:var(--color-bg)}
+
+/* outlook */
+.ohero{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:clamp(20px,5vw,72px);align-items:end;padding:clamp(28px,5vw,60px) 0 clamp(18px,3vw,30px)}
+.otitle{font-family:var(--font-display);font-weight:200;font-size:clamp(40px,7.4vw,104px);line-height:.94;letter-spacing:-.04em;margin:12px 0 18px;font-variation-settings:"opsz" 144}
+.otitle i{font-weight:300;color:var(--color-accent)}
+.olede{font-size:15px;line-height:1.65;max-width:60ch;color:var(--color-muted);margin:0}
+.oscore{border:1px solid var(--color-line);border-radius:var(--radius);padding:18px 20px;background:var(--color-surface)}
+.oscore .big{font-family:var(--font-display);font-weight:300;font-size:30px;letter-spacing:-.02em;line-height:1.15;margin:8px 0 12px}
+.oscore .trio{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;border-top:1px solid var(--color-line);border-bottom:1px solid var(--color-line);padding:11px 0;font-family:var(--font-mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--color-muted)}
+.oscore .trio b{display:block;font-size:17px;letter-spacing:0;font-weight:500;color:var(--color-text);margin-bottom:3px}.oscore .trio div:first-child b{color:var(--color-accent)}
+.oscore p{font-size:13px;color:var(--color-muted);margin:8px 0 0;line-height:1.55}
+.ocontrols{display:flex;gap:10px 14px;flex-wrap:wrap;align-items:center;padding-bottom:16px}.ocontrols .seg{margin-left:0}.ocontrols .sub{margin-left:auto;font-size:11px;color:var(--color-muted)}
+.orow{display:grid;grid-template-columns:minmax(190px,1.4fr) minmax(170px,2fr) 128px minmax(170px,1.15fr);gap:6px 28px;align-items:center;padding:14px 0;border-top:1px solid var(--color-line-soft)}
+.orow:first-child{border-top:0;padding-top:4px}
+.orow .nm{font-weight:600;font-size:15px}.orow .sm{font-family:var(--font-mono);font-size:10.5px;color:var(--color-muted);margin-top:4px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.gauge{position:relative;height:34px}
+.gauge::before{content:"";position:absolute;left:0;right:0;top:16px;height:2px;background:var(--color-line);border-radius:2px}
+.gauge .half{position:absolute;left:50%;top:9px;width:1px;height:16px;background:var(--color-faint)}
+.gauge .band{position:absolute;top:12px;height:10px;border-radius:5px;background:var(--color-glow);border:1px solid var(--color-accent);opacity:.75;transition:all .7s var(--ease)}
+.gauge .dot{position:absolute;top:10px;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:var(--color-accent);border:2px solid var(--color-surface);transition:left .7s var(--ease)}
+.gauge .base{position:absolute;top:6px;width:1px;height:22px;margin-left:-.5px;border-left:1px dashed var(--color-text);opacity:.55}
+.gauge .ax{position:absolute;top:26px;font-family:var(--font-mono);font-size:9px;color:var(--color-faint)}
+.opct{font-family:var(--font-display);font-weight:300;font-size:38px;line-height:1;letter-spacing:-.03em;text-align:right;font-variation-settings:"opsz" 72}
+.opct small{display:block;font-family:var(--font-mono);font-size:10.5px;letter-spacing:0;color:var(--color-muted);margin-top:5px}
+.otyp{font-family:var(--font-mono);font-size:11.5px;line-height:1.7;color:var(--color-muted)}.otyp b{color:var(--color-text);font-weight:500}
+#viewOutlook .panel{animation:none}
+.ocav{margin:clamp(14px,1.8vw,24px) 0 clamp(22px,3vw,40px)}.ocav ul{margin:14px 0 0;padding-left:18px;color:var(--color-muted);font-size:13.5px;line-height:1.65;max-width:86ch}.ocav li{margin-bottom:8px}.ocav b{color:var(--color-text);font-weight:500}
+.okey{display:flex;gap:16px;flex-wrap:wrap;font-family:var(--font-mono);font-size:10.5px;color:var(--color-muted);padding:2px 0 12px;border-bottom:1px solid var(--color-line)}
+.okey i{display:inline-block;vertical-align:middle;margin-right:6px}.okey .kd{width:10px;height:10px;border-radius:50%;background:var(--color-accent)}.okey .kb{width:22px;height:8px;border-radius:4px;border:1px solid var(--color-accent);background:var(--color-glow)}.okey .kl{width:0;height:14px;border-left:1px dashed var(--color-text)}
+
 /* hero */
 .hero{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:clamp(20px,5vw,80px);align-items:end;padding:clamp(28px,5vw,64px) 0 clamp(18px,3vw,36px)}
 .equity{font-family:var(--font-display);font-weight:200;font-size:clamp(64px,13.5vw,188px);line-height:.86;letter-spacing:-.045em;font-variation-settings:"opsz" 144;margin:10px 0 0 -.04em;white-space:nowrap}
@@ -205,6 +239,7 @@ footer{padding:26px 0 60px;color:var(--color-muted);font-size:12px;display:flex;
 footer .mono{font-size:11px}
 
 @media (max-width:980px){
+  .ohero{grid-template-columns:1fr}.orow{grid-template-columns:minmax(0,1fr) 110px}.orow .gauge{grid-column:1/-1;order:3}.orow .otyp{grid-column:1/-1;order:4}
   .c7,.c5,.c8,.c4{grid-column:span 12}.vgrid{grid-template-columns:1fr}.bars{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media (max-width:640px){
@@ -219,6 +254,7 @@ footer .mono{font-size:11px}
 <div class="wrap">
   <header class="top">
     <div class="brand">paper<i>/</i>bot</div>
+    <nav class="tabs" id="tabs" aria-label="Views"><button data-view="bot" class="on">Trading bot</button><button data-view="outlook">Outlook</button></nav>
     <span class="chip">Paper only · simulated $</span>
     <span class="chip hash" id="hash" title="SHA-256 of the locked experiment config">config <b>—</b></span>
     <span class="spacer"></span>
@@ -226,7 +262,10 @@ footer .mono{font-size:11px}
     <button class="themebtn" id="theme" aria-label="Toggle light / dark theme" title="Toggle theme">◐</button>
   </header>
   <div class="banner" id="banner"></div>
+</div>
 
+<div id="viewBot">
+<div class="wrap">
   <section class="hero">
     <div>
       <div class="label">Equity <span class="live" id="liveTag">LIVE TICKS</span></div>
@@ -332,6 +371,39 @@ footer .mono{font-size:11px}
       <div id="bt"></div>
     </section>
   </div>
+</div>
+</div><!-- /viewBot -->
+
+<div id="viewOutlook" hidden>
+  <div class="wrap">
+    <section class="ohero">
+      <div>
+        <div class="label">Outlook · measured from history · not a forecast, not advice</div>
+        <h1 class="otitle">How often was it <i>higher</i> later?</h1>
+        <p class="olede">For each asset, the share of past periods of this length that ended higher than they started, with an honest range around it. It describes what has happened, not what will. Nobody can reliably call the direction of a market, and the self-test alongside shows how little these numbers add.</p>
+      </div>
+      <div class="oscore" id="oScore"></div>
+    </section>
+    <div class="ocontrols">
+      <div class="seg" id="oHorizon"></div>
+      <div class="seg" id="oKind"><button data-k="" class="on">All</button><button data-k="index">Indices</button><button data-k="stock">Stocks</button><button data-k="commodity">Commodities</button><button data-k="crypto">Crypto</button></div>
+      <span class="sub mono" id="oMeta"></span>
+    </div>
+    <section class="panel" id="oList"><div class="empty"><b>Loading the outlook…</b></div></section>
+    <section class="panel ocav">
+      <h2>Read this before trusting a number</h2>
+      <ul>
+        <li><b>Past frequency is not future probability.</b> "Up 77% of past years" means exactly that. The next year is one draw, and regimes change.</li>
+        <li><b>The companies listed are survivors.</b> They are on this list because they grew. Their history flatters them; firms that failed are not here to drag the average down.</li>
+        <li><b>"Higher" ignores size.</b> An asset can be up most of the time and still lose money if the falls are bigger than the rises. Check the typical range, not only the percentage.</li>
+        <li><b>The range is real uncertainty.</b> A year-long window overlaps the next one almost entirely, so 25 years of daily data is roughly 25 independent observations, not thousands.</li>
+        <li><b>Prices are in each asset's own currency</b> and adjusted for splits and dividends. Inflation, taxes, fees and currency moves are not included.</li>
+      </ul>
+    </section>
+  </div>
+</div>
+
+<div class="wrap">
   <footer>
     <span>Simulated trading on public market data. Not financial advice. Past and simulated results do not predict future results.</span>
     <span class="mono" id="foot"></span>
@@ -418,7 +490,7 @@ function hero() {
   const msgs = [];
   if (DEMO) msgs.push("DEMO DATA — randomly generated to preview the layout. Not real results.");
   if (e.config_dirty) msgs.push("config.yaml was edited after the experiment started. The edit is ignored: the bot keeps trading the locked config shown above.");
-  if (e.code_sha_start && e.code_sha && e.code_sha !== e.code_sha_start) msgs.push(`Bot code changed mid-experiment (${esc(e.code_sha_start)} → ${esc(e.code_sha)}).`);
+  if (e.code_sha_start && e.code_sha && e.code_sha !== e.code_sha_start) msgs.push(`Trading code changed mid-experiment (${esc(e.code_sha_start)} → ${esc(e.code_sha)}). Results before and after are not strictly comparable.`);
   if (s.code === "KILLED" || s.code === "DATA_STALE" || s.code === "HALTED_DAY") msgs.push(esc(s.detail));
   $("banner").innerHTML = msgs.join("<br>"); $("banner").classList.toggle("on", msgs.length > 0);
   heartbeat();
@@ -618,6 +690,53 @@ function demoData() {
     data: {exchange: "demo", timeframe_minutes: 5}, config: {universe: syms, costs: {taker_fee: .001, half_spread: .0002, slippage: .0003}}, backtest: null};
 }
 
+/* ---------- outlook tab: historical odds from outlook.json (built daily by a separate job) ---------- */
+let O = null, oH = 0, oK = "", oTried = false;
+const KIND = {index: "Index", stock: "Stock", commodity: "Commodity", crypto: "Crypto"};
+async function loadOutlook() {
+  const m = location.hostname.match(/^([^.]+)\.github\.io$/), repo = location.pathname.split("/")[1];
+  const urls = (m && repo ? [`https://raw.githubusercontent.com/${m[1]}/${repo}/outlook/outlook.json`] : []).concat(["outlook.json?t=" + Date.now()]);
+  for (const u of urls) { try { const d = await getJSON(u); if (d && d.assets) { O = d; break; } } catch (e) {} }
+  oTried = true; outlook();
+}
+function outlook() {
+  if (!O) { $("oList").innerHTML = `<div class="empty"><b>${oTried ? "No outlook published yet." : "Loading the outlook…"}</b>${oTried ? "It is built once a day by a separate job and appears here after its first run." : ""}</div>`; $("oScore").innerHTML = ""; return; }
+  const labels = O.summary.map(s => s.label), lab = labels[oH] || labels[0];
+  $("oHorizon").innerHTML = labels.map((l, i) => `<button data-h="${i}" class="${i === oH ? "on" : ""}">${esc(l)}</button>`).join("");
+  const s = O.summary[oH], P = v => (v * 100).toFixed(0);
+  if (s) {
+    const edge = (0.25 - s.brier) / 0.25 * 100, worse = s.brier > s.brier_base;
+    $("oScore").innerHTML = `<div class="label">Self-test · ${esc(lab)} · ${s.calls.toLocaleString("en-US")} past calls replayed</div>
+      <div class="big">${edge <= 0.5 ? "No better than a coin flip." : worse || s.brier_base - s.brier < 0.001 ? "Adds nothing beyond “it usually went up”." : edge < 6 ? "Barely better than a coin flip." : edge < 15 ? "Somewhat better than a coin flip." : "Clearly better than a coin flip."}</div>
+      <div class="trio"><div><b>${s.brier.toFixed(3)}</b>these odds</div><div><b>${s.brier_base.toFixed(3)}</b>long-run average</div><div><b>0.250</b>coin flip</div><div><b>0</b>perfect</div></div>
+      <p>Each estimate was re-made at past dates using only data available then, and scored against what happened (Brier score, lower is better). Always quoting the long-run average scored ${s.brier_base.toFixed(3)}${worse ? ", which is <b style=\"color:var(--color-text)\">better</b> than the trend-adjusted version, so the headline numbers below are plain base rates unless marked" : ""}. Most of the edge over a coin flip comes from one fact: these assets rose in ${P(s.up_rate)}% of past ${esc(lab.replace(/^\d+ /, "")).replace(/s$/, "")}-long periods.</p>`;
+  }
+  const gen = new Date(O.generated_ts);
+  $("oMeta").textContent = `updated ${fFull.format(gen)} IST · ${O.ok}/${O.assets.length} assets fresh · ${O.method.source}`;
+  const rows = O.assets.filter(a => !oK || a.kind === oK);
+  $("oList").innerHTML = `<div class="okey"><span><i class="kd"></i>share of past periods that ended higher</span><span><i class="kb"></i>80% range</span><span><i class="kl"></i>plain base rate</span><span>centre tick = 50%</span></div>` + (rows.map(a => {
+    const h = (a.horizons || []).find(x => x.label === lab);
+    const head = `<div><div class="nm">${esc(a.name)}</div><div class="sm"><span>${esc(a.symbol)}</span><span class="tag">${KIND[a.kind] || esc(a.kind)}</span>${a.kind === "stock" ? '<span class="tag" title="This company is on the list because it survived and grew. Its history is flattering.">survivor</span>' : ""}${a.trend && a.trend.state !== "unknown" ? `<span class="tag ${a.trend.state === "above" ? "long" : "short"}" title="Last price versus its 200-day average">${a.trend.state} 200d avg</span>` : ""}${a.stale ? '<span class="tag" style="color:var(--color-warn);border-color:currentColor" title="Today\'s data fetch failed; showing the last good result">stale</span>' : ""}</div><div class="sm">${a.history_years ? `${a.history_years} years of data · as of ${esc(a.as_of)}` : ""}${h && h.used === "conditional" ? ' · <span title="The trend signal beat the base rate in the replay for this asset, so it is applied here">trend-adjusted</span>' : ""}</div></div>`;
+    if (!h || h.prob == null) return `<div class="orow">${head}<div class="otyp" style="grid-column:2/-1">${esc(a.error ? "Data unavailable: " + a.error : (h && h.note) || "Not enough history for this horizon.")}</div></div>`;
+    const sc = h.score || {}, d = h.dist;
+    return `<div class="orow">${head}
+      <div class="gauge" title="Estimate ${P(h.prob)}%, range ${P(h.lo)}–${P(h.hi)}%, base rate ${P(h.base)}%"><span class="half"></span><span class="band" style="left:${(h.lo * 100).toFixed(1)}%;width:${((h.hi - h.lo) * 100).toFixed(1)}%"></span><span class="base" style="left:${(h.base * 100).toFixed(1)}%"></span><span class="dot" style="left:${(h.prob * 100).toFixed(1)}%"></span><span class="ax" style="left:0">0%</span><span class="ax" style="right:0">100%</span></div>
+      <div class="opct">${P(h.prob)}<span style="font-size:.5em;color:var(--color-muted)">%</span><small>range ${P(h.lo)}–${P(h.hi)}%</small></div>
+      <div class="otyp">typical move <b class="${cls(d.p50)}">${pct(d.p50, 1)}</b><br>1 in 10 worse than <b>${pct(d.p10, 1)}</b><br>1 in 10 better than <b>${pct(d.p90, 1)}</b></div></div>`;
+  }).join("") || `<div class="empty"><b>Nothing in this category.</b></div>`);
+}
+function setView(v) {
+  const out = v === "outlook";
+  $("viewBot").hidden = out; $("viewOutlook").hidden = !out;
+  document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("on", b.dataset.view === (out ? "outlook" : "bot")));
+  if (out) { if (!O) loadOutlook(); else outlook(); } else if (D) chart();  // the chart needs a visible box to size itself
+  try { history.replaceState(null, "", out ? "#outlook" : location.pathname + location.search); } catch (e) {}
+}
+$("tabs").onclick = e => { const b = e.target.closest("button"); if (b) setView(b.dataset.view); };
+$("oHorizon").onclick = e => { const b = e.target.closest("button"); if (b) { oH = +b.dataset.h; outlook(); } };
+$("oKind").onclick = e => { const b = e.target.closest("button"); if (!b) return; oK = b.dataset.k; document.querySelectorAll("#oKind button").forEach(x => x.classList.toggle("on", x === b)); outlook(); };
+setInterval(() => { if (!$("viewOutlook").hidden) loadOutlook(); }, 30 * 60000);
+
 /* ---------- boot ---------- */
 const savedTheme = (() => { try { return localStorage.getItem("theme"); } catch (e) { return null; } })();
 if (savedTheme) document.documentElement.dataset.theme = savedTheme;
@@ -628,6 +747,8 @@ let rz; addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() 
 setInterval(() => { heartbeat(); if (D && D.positions.length) { hero(); positions(); } document.querySelectorAll("[data-since]").forEach(n => n.textContent = dur(Date.now() - +n.dataset.since)); }, 1000);
 setInterval(() => { if (D && D.positions.length && Object.keys(livePx).length) chart(); }, 15000);
 load(); if (!DEMO) setInterval(load, 30000);
+if (location.hash === "#outlook") setView("outlook");
+addEventListener("hashchange", () => setView(location.hash === "#outlook" ? "outlook" : "bot"));
 </script>
 </body>
 </html>

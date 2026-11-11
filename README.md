@@ -47,8 +47,8 @@ and the v1 bot already used it. The cost is timer jitter, which the catch-up des
   once. Later runs only refresh the heartbeat.
 * When the experiment starts the bot stores a snapshot of `config.yaml` (everything except `ops`)
   in its state and shows the SHA-256 on the dashboard. **Editing `config.yaml` mid-experiment has no
-  effect**; the dashboard shows a warning instead. The git commit the experiment started on is
-  recorded too, and a later code change is flagged.
+  effect**; the dashboard shows a warning instead. A fingerprint of the trading code (`bot/*.py`) is
+  recorded too, and a later change to it is flagged. Dashboard, docs and Outlook changes are not.
 * To start over with a new config: Actions → paper-bot → Run workflow → type `RESET`. The old state
   is archived to `archive/state-<timestamp>` first.
 
@@ -99,9 +99,10 @@ bot/signals.py    regime classifier + ensemble             bot/metrics.py   stat
 bot/model.py      labels, training, calibration            bot/state.py     atomic persistence
 bot/broker.py     paper fills and costs                    bot/notify.py    optional Telegram
 bot/risk.py       sizing, limits, kill switch              bot/cli.py       command line
+invest/outlook.py      Outlook tab: historical odds with a self-test (separate from the bot)
 dashboard/index.html   single-file dashboard (no build step)
 research/              download, walk-forward backtest, exploration scripts
-tests/                 91 tests
+tests/                 107 tests
 ```
 
 ## Run it locally
@@ -134,6 +135,29 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 2. After that run has created the `state` branch (about two minutes): Settings → Pages → Build and
    deployment → Source "Deploy from a branch" → Branch `state`, folder `/ (root)` → Save.
 3. Nothing else. No secrets are required. Scheduled runs then keep it going every 30 minutes.
+
+## Outlook tab (separate from the bot)
+
+The dashboard's **Outlook** tab answers one narrow question for a watchlist of indices, stocks,
+commodities and crypto: *how often was this asset higher 1 month, 3 months or 1 year later?*
+
+* It reports measured historical frequencies with an 80% range. It is **not a forecast and not advice**.
+* It grades itself. Every estimate is replayed over the asset's own past using only data available
+  at the time, then scored (Brier) against a coin flip and against the plain long-run average. The
+  page shows that score. On current data the trend-adjusted estimate does **not** beat the plain
+  base rate, so the headline numbers are base rates unless a row says "trend-adjusted".
+* Overlapping windows are counted honestly: a year-long horizon over 25 years is about 25
+  independent observations, which is why the ranges are wide.
+* The stock rows are survivors (they are listed because they grew), so their history flatters them.
+
+It is independent of the trading experiment: its own package (`invest/`), its own daily workflow
+(`outlook.yml`) and its own branch (`outlook`). It never touches the bot's state or config. Edit
+`invest/watchlist.yaml` to change the assets (Yahoo Finance tickers). Data: Yahoo Finance daily
+adjusted closes, fetched without a key; if a fetch fails the last good result is shown, marked stale.
+
+```bash
+.venv/bin/python -m invest.outlook --out outlook.json
+```
 
 ## Optional Telegram alerts
 

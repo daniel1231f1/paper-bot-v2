@@ -15,6 +15,6 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          for wf in paper-bot.yml keepalive.yml; do
+          for wf in paper-bot.yml outlook.yml keepalive.yml; do
             gh api -X PUT "repos/${GITHUB_REPOSITORY}/actions/workflows/${wf}/enable" && echo "kept ${wf} alive"
           done
